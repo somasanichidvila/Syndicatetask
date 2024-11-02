@@ -1,0 +1,31 @@
+name: syndicate_tasks
+events:
+- operation: build
+  initiator: somasani_chidvila
+  bundle_name: syndicate_tasks_241102.011432
+  time_start: '2024-11-02T01:14:33Z'
+  time_end: '2024-11-02T01:14:35Z'
+  duration_sec: 2.135
+- operation: upload
+  initiator: somasani_chidvila
+  bundle_name: syndicate_tasks_241102.011432
+  time_start: '2024-11-02T01:14:35Z'
+  time_end: '2024-11-02T01:14:35Z'
+  duration_sec: 0.636
+- operation: package_meta
+  initiator: somasani_chidvila
+  bundle_name: syndicate_tasks_241102.011432
+  time_start: '2024-11-02T01:14:35Z'
+  time_end: '2024-11-02T01:14:35Z'
+  duration_sec: 0.03
+- operation: assemble
+  initiator: somasani_chidvila
+  bundle_name: syndicate_tasks_241102.011432
+  time_start: '2024-11-02T01:14:35Z'
+  time_end: '2024-11-02T01:14:35Z'
+  duration_sec: 0.004
+- operation: test
+  initiator: somasani_chidvila
+  time_start: '2024-11-02T01:14:35Z'
+  time_end: '2024-11-02T01:14:35Z'
+  duration_sec: 0.002
