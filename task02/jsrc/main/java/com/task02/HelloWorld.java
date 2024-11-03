@@ -37,7 +37,10 @@ public class HelloWorld implements RequestHandler<APIGatewayProxyRequestEvent, A
 			Map<String, String> headers = new HashMap<>();
 			headers.put("Content-Type", "application/json");
 
-			if ("/hello".equals(request.getPath()) && "GET".equalsIgnoreCase(request.getHttpMethod())) {
+			String path = request.getPath();
+			String httpMethod = request.getHttpMethod();
+
+			if ("/hello".equals(request.getPath()) && "GET".equalsIgnoreCase(httpMethod)) {
 				response.setStatusCode(200);
 				response.setHeaders(headers);
 				response.setBody("{\"statusCode\": 200, \"message\": \"Hello from Lambda\"}");
@@ -47,7 +50,7 @@ public class HelloWorld implements RequestHandler<APIGatewayProxyRequestEvent, A
 				response.setBody("{\"statusCode\": 400, \"message\": \"Bad request syntax or unsupported method. Request path: "
 						+ request.getPath()
 						+ ". HTTP method: "
-						+ request.getHttpMethod()
+						+ httpMethod
 						+ "\"}");
 			}
 
