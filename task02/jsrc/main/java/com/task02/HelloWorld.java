@@ -33,27 +33,19 @@ public class HelloWorld implements RequestHandler<APIGatewayProxyRequestEvent, A
 
 		@Override
 		public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
-			APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
-			Map<String, String> headers = new HashMap<>();
-			headers.put("Content-Type", "application/json");
-
 			String path = request.getPath();
-			String httpMethod = request.getHttpMethod();
+			String method = request.getHttpMethod();
 
-			if ("/hello".equals(path) && "GET".equalsIgnoreCase(httpMethod)) {
-				response.setStatusCode(200);
-				response.setHeaders(headers);
-				response.setBody("{\"statusCode\": 200, \"message\": \"Hello from Lambda\"}");
+			if ("/hello".equals(path) && "GET".equals(method)) {
+				return new APIGatewayProxyResponseEvent()
+						.withStatusCode(200)
+						.withBody("{\"message\": \"Hello from Lambda\"}");
 			} else {
-				response.setStatusCode(400);
-				response.setHeaders(headers);
-				response.setBody("{\"statusCode\": 400, \"message\": \"Bad request syntax or unsupported method. Request path: "
-						+ path
-						+ ". HTTP method: "
-						+ httpMethod
-						+ "\"}" + request.toString());
+				return new APIGatewayProxyResponseEvent()
+						.withStatusCode(400)
+						.withBody(String.format(
+								"{\"message\": \"Bad request syntax or unsupported method. Request path: %s. HTTP method: %s\"}",
+								path, method));
 			}
-
-			return response;
 		}
-	}
+}
