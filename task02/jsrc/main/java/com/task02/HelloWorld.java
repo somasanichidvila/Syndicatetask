@@ -31,45 +31,29 @@ import java.util.Map;
 
 public class HelloWorld implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
-	@Override
-	public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
-		APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
-		Map<String, String> headers = new HashMap<>();
-		headers.put("Content-Type", "application/json");
+		@Override
+		public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
+			APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
+			Map<String, String> headers = new HashMap<>();
+			headers.put("Content-Type", "application/json");
 
-		String path = request.getPath();
-		String httpMethod = request.getHttpMethod();
+			String path = request.getPath();
+			String httpMethod = request.getHttpMethod();
 
-		context.getLogger().log("Received Path: " + path);
-		context.getLogger().log("Received HTTP Method: " + httpMethod);
+			if ("/hello".equals(path) && "GET".equalsIgnoreCase(httpMethod)) {
+				response.setStatusCode(200);
+				response.setHeaders(headers);
+				response.setBody("{\"statusCode\": 200, \"message\": \"Hello from Lambda\"}");
+			} else {
+				response.setStatusCode(400);
+				response.setHeaders(headers);
+				response.setBody("{\"statusCode\": 400, \"message\": \"Bad request syntax or unsupported method. Request path: "
+						+ path
+						+ ". HTTP method: "
+						+ httpMethod
+						+ "\"}");
+			}
 
-		if (path == null || httpMethod == null) {
-			response.setStatusCode(400);
-			response.setHeaders(headers);
-			response.setBody("{\"statusCode\": 400, \"message\": \"Bad request syntax or unsupported method. Request path: "
-					+ path
-					+ ". HTTP method: "
-					+ httpMethod
-					+ "\"}");
 			return response;
 		}
-
-		// Handle the /hello path with GET method
-		if ("/hello".equals(path) && "GET".equalsIgnoreCase(httpMethod)) {
-			response.setStatusCode(200);
-			response.setHeaders(headers);
-			response.setBody("{\"statusCode\": 200, \"message\": \"Hello from Lambda\"}");
-		} else {
-			// Return 400 Bad Request for any other paths or methods
-			response.setStatusCode(400);
-			response.setHeaders(headers);
-			response.setBody("{\"statusCode\": 400, \"message\": \"Bad request syntax or unsupported method. Request path: "
-					+ path
-					+ ". HTTP method: "
-					+ httpMethod
-					+ "\"}");
-		}
-
-		return response;
 	}
-}
