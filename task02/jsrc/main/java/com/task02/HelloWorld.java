@@ -10,10 +10,6 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 import com.syndicate.deployment.model.lambda.url.AuthType;
 import com.syndicate.deployment.model.lambda.url.InvokeMode;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-
 @LambdaHandler(
 		lambdaName = "hello_world",
 		roleName = "hello_world-role",
@@ -30,10 +26,29 @@ public class HelloWorld implements RequestHandler<APIGatewayProxyRequestEvent, A
 
 	@Override
 	public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
-		String rawPath = request.getRawPath() != null ? request.getRawPath() : "";
-		String method = request.getHttpMethod() != null ? request.getHttpMethod() : "";
+		String path = request.getPath();
+		String method = request.getHttpMethod();
 
-		if ("/hello".equals(rawPath) && "GET".equals(method)) {
+		// Log the entire request object
+		context.getLogger().log("Request: " + request.toString());
+
+		if (path == null || method == null) {
+			// Log the null values
+			if (path == null) {
+				context.getLogger().log("Path is null");
+			}
+			if (method == null) {
+				context.getLogger().log("Method is null");
+			}
+
+			// Return 400 Bad Request if the path or method is null
+			String errorMessage = "{\"message\": \"Bad request syntax. Request path or method is missing.\"}";
+			return new APIGatewayProxyResponseEvent()
+					.withStatusCode(400)
+					.withBody(errorMessage);
+		}
+
+		if ("/hello".equals(path) && "GET".equals(method)) {
 			return new APIGatewayProxyResponseEvent()
 					.withStatusCode(200)
 					.withBody("{\"message\": \"Hello from Lambda\"}");
@@ -41,7 +56,7 @@ public class HelloWorld implements RequestHandler<APIGatewayProxyRequestEvent, A
 			// Return 400 Bad Request for all other endpoints
 			String errorMessage = String.format(
 					"{\"message\": \"Bad request syntax or unsupported method. Request path: %s. HTTP method: %s\"}",
-					rawPath, method);
+					path, method);
 			return new APIGatewayProxyResponseEvent()
 					.withStatusCode(400)
 					.withBody(errorMessage);
