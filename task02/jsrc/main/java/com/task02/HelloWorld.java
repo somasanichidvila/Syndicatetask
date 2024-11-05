@@ -6,6 +6,7 @@ import com.syndicate.deployment.model.RetentionSetting;
 import com.syndicate.deployment.model.lambda.url.AuthType;
 import com.syndicate.deployment.model.lambda.url.InvokeMode;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,8 +20,7 @@ import java.util.Map;
 @LambdaUrlConfig(
 		authType = AuthType.NONE,
 		invokeMode = InvokeMode.BUFFERED
-)
-public class HelloWorld implements RequestHandler<Map<String, Object>, Map<String, Object>> {
+)public class HelloWorld implements RequestHandler<Map<String, Object>, Map<String, Object>> {
 
 	private static final String SUCCESS_MESSAGE = "{\"message\": \"Hello from Lambda\"}";
 	private static final String BAD_REQUEST_MESSAGE_TEMPLATE = "{\"message\": \"Bad request syntax or unsupported method. Request path: %s. HTTP method: %s\"}";
