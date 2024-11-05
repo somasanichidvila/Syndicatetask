@@ -1,14 +1,13 @@
-package com.task02;
-
 import com.amazonaws.services.lambda.runtime.Context;
 import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.syndicate.deployment.annotations.lambda.LambdaHandler;
 import com.syndicate.deployment.annotations.lambda.LambdaUrlConfig;
 import com.syndicate.deployment.model.RetentionSetting;
-import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
-import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.syndicate.deployment.model.lambda.url.AuthType;
 import com.syndicate.deployment.model.lambda.url.InvokeMode;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @LambdaHandler(
 		lambdaName = "hello_world",
@@ -18,48 +17,34 @@ import com.syndicate.deployment.model.lambda.url.InvokeMode;
 		logsExpiration = RetentionSetting.SYNDICATE_ALIASES_SPECIFIED
 )
 @LambdaUrlConfig(
-		authType = AuthType.NONE, // This means no authentication is required to access the Function URL
-		invokeMode = InvokeMode.BUFFERED // This can be set to BUFFERED or STREAMING based on your requirements
+		authType = AuthType.NONE,
+		invokeMode = InvokeMode.BUFFERED
 )
-
-public class HelloWorld implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+public class HelloWorld implements RequestHandler<Map<String, Object>, Map<String, Object>> {
 
 	@Override
-	public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
-		String path = request.getPath();
-		String method = request.getHttpMethod();
+	public Map<String, Object> handleRequest(Map<String, Object> request, Context context) {
+		Map<String, Object> payloadRequestContext = (Map<String, Object>) request.get("requestContext");
+		Map<String, Object> payloadRequestContextHttp = (Map<String, Object>) payloadRequestContext.get("http");
 
-		// Log the entire request object
-		context.getLogger().log("Request: " + request.toString());
+		String path = (String) payloadRequestContextHttp.get("path");
+		String method = (String) payloadRequestContextHttp.get("httpMethod");
 
-		if (path == null || method == null) {
-			// Log the null values
-			if (path == null) {
-				context.getLogger().log("Path is null");
+		Map<String, Object> responseMap = new HashMap<>();
+
+		if (path != null && method != null) {
+			if ("/hello".equals(path) && "GET".equals(method)) {
+				responseMap.put("statusCode", 200);
+				responseMap.put("body", "{\"message\": \"Hello from Lambda\"}");
+			} else {
+				responseMap.put("statusCode", 400);
+				responseMap.put("body", String.format("{\"message\": \"Bad request syntax or unsupported method. Request path: %s. HTTP method: %s\"}", path, method));
 			}
-			if (method == null) {
-				context.getLogger().log("Method is null");
-			}
-
-			// Return 400 Bad Request if the path or method is null
-			String errorMessage = "{\"message\": \"Bad request syntax. Request path or method is missing.\"}";
-			return new APIGatewayProxyResponseEvent()
-					.withStatusCode(400)
-					.withBody(errorMessage);
-		}
-
-		if ("/hello".equals(path) && "GET".equals(method)) {
-			return new APIGatewayProxyResponseEvent()
-					.withStatusCode(200)
-					.withBody("{\"message\": \"Hello from Lambda\"}");
 		} else {
-			// Return 400 Bad Request for all other endpoints
-			String errorMessage = String.format(
-					"{\"message\": \"Bad request syntax or unsupported method. Request path: %s. HTTP method: %s\"}",
-					path, method);
-			return new APIGatewayProxyResponseEvent()
-					.withStatusCode(400)
-					.withBody(errorMessage);
+			responseMap.put("statusCode", 400);
+			responseMap.put("body", "{\"message\": \"Bad request syntax. Request path or method is missing.\"}");
 		}
+
+		return responseMap;
 	}
 }
