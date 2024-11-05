@@ -22,11 +22,6 @@
         <!-- AWS dependencies-->
         <dependency>
             <groupId>com.amazonaws</groupId>
-            <artifactId>aws-lambda-java-events</artifactId>
-            <version>3.10.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.amazonaws</groupId>
             <artifactId>aws-lambda-java-core</artifactId>
             <version>1.2.0</version>
         </dependency>
@@ -36,8 +31,6 @@
             <artifactId>deployment-configuration-annotations</artifactId>
             <version>${syndicate.java.plugin.version}</version>
         </dependency>
-
-
     </dependencies>
 
     <build>

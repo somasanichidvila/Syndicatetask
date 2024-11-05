@@ -6,7 +6,6 @@ import com.syndicate.deployment.model.RetentionSetting;
 import com.syndicate.deployment.model.lambda.url.AuthType;
 import com.syndicate.deployment.model.lambda.url.InvokeMode;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,24 +22,41 @@ import java.util.Map;
 )
 public class HelloWorld implements RequestHandler<Map<String, Object>, Map<String, Object>> {
 
+	private static final String SUCCESS_MESSAGE = "{\"message\": \"Hello from Lambda\"}";
+	private static final String BAD_REQUEST_MESSAGE_TEMPLATE = "{\"message\": \"Bad request syntax or unsupported method. Request path: %s. HTTP method: %s\"}";
+	private static final String SUPPORTED_PATH = "/hello";
+	private static final String SUPPORTED_METHOD = "GET";
+
 	@Override
 	public Map<String, Object> handleRequest(Map<String, Object> request, Context context) {
+		String path = extractPathFromRequest(request);
+		String method = extractMethodFromRequest(request);
+
+		return generateResponse(path, method);
+	}
+
+	private String extractPathFromRequest(Map<String, Object> request) {
 		Map<String, Object> requestContext = (Map<String, Object>) request.get("requestContext");
 		Map<String, Object> httpContext = (Map<String, Object>) requestContext.get("http");
-		String path = (String) httpContext.get("path");
-		String method = (String) httpContext.get("httpMethod");
+		return (String) httpContext.get("path");
+	}
 
+	private String extractMethodFromRequest(Map<String, Object> request) {
+		Map<String, Object> requestContext = (Map<String, Object>) request.get("requestContext");
+		Map<String, Object> httpContext = (Map<String, Object>) requestContext.get("http");
+		return (String) httpContext.get("method");
+	}
+
+	private Map<String, Object> generateResponse(String path, String method) {
 		Map<String, Object> response = new HashMap<>();
-
-		if ("/hello".equals(path) && "GET".equals(method)) {
+		if (SUPPORTED_PATH.equals(path) && SUPPORTED_METHOD.equals(method)) {
 			response.put("statusCode", 200);
-			response.put("body", "{\"message\": \"Hello from Lambda\"}");
+			response.put("body", SUCCESS_MESSAGE);
 		} else {
-			String errorMessage = String.format("{\"message\": \"Bad request syntax or unsupported method. Request path: %s. HTTP method: %s\"}", path, method);
+			String errorMessage = String.format(BAD_REQUEST_MESSAGE_TEMPLATE, path, method);
 			response.put("statusCode", 400);
 			response.put("body", errorMessage);
 		}
-
 		return response;
 	}
 }
