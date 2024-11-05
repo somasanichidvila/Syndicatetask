@@ -15,37 +15,36 @@ import java.util.HashMap;
 import java.util.Map;
 
 @LambdaHandler(
-    lambdaName = "hello_world",
-	roleName = "hello_world-role",
-	isPublishVersion = true,
-	aliasName = "${lambdas_alias_name}",
-	logsExpiration = RetentionSetting.SYNDICATE_ALIASES_SPECIFIED
+		lambdaName = "hello_world",
+		roleName = "hello_world-role",
+		isPublishVersion = true,
+		aliasName = "${lambdas_alias_name}",
+		logsExpiration = RetentionSetting.SYNDICATE_ALIASES_SPECIFIED
 )
 @LambdaUrlConfig(
-
 		authType = AuthType.NONE, // This means no authentication is required to access the Function URL
-
 		invokeMode = InvokeMode.BUFFERED // This can be set to BUFFERED or STREAMING based on your requirements
-
 )
 
 public class HelloWorld implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
 
-		@Override
-		public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
-			String path = request.getPath();
-			String method = request.getHttpMethod();
+	@Override
+	public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent request, Context context) {
+		String rawPath = request.getRawPath() != null ? request.getRawPath() : "";
+		String method = request.getHttpMethod() != null ? request.getHttpMethod() : "";
 
-			if ("/hello".equals(path) && "GET".equals(method)) {
-				return new APIGatewayProxyResponseEvent()
-						.withStatusCode(200)
-						.withBody("{\"message\": \"Hello from Lambda\"}");
-			} else {
-				return new APIGatewayProxyResponseEvent()
-						.withStatusCode(400)
-						.withBody(String.format(
-								"{\"message\": \"Bad request syntax or unsupported method. Request path: %s. HTTP method: %s\"}",
-								path, method));
-			}
+		if ("/hello".equals(rawPath) && "GET".equals(method)) {
+			return new APIGatewayProxyResponseEvent()
+					.withStatusCode(200)
+					.withBody("{\"message\": \"Hello from Lambda\"}");
+		} else {
+			// Return 400 Bad Request for all other endpoints
+			String errorMessage = String.format(
+					"{\"message\": \"Bad request syntax or unsupported method. Request path: %s. HTTP method: %s\"}",
+					rawPath, method);
+			return new APIGatewayProxyResponseEvent()
+					.withStatusCode(400)
+					.withBody(errorMessage);
 		}
+	}
 }
