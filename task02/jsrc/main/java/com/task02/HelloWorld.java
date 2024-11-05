@@ -6,6 +6,7 @@ import com.syndicate.deployment.model.RetentionSetting;
 import com.syndicate.deployment.model.lambda.url.AuthType;
 import com.syndicate.deployment.model.lambda.url.InvokeMode;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,27 +25,22 @@ public class HelloWorld implements RequestHandler<Map<String, Object>, Map<Strin
 
 	@Override
 	public Map<String, Object> handleRequest(Map<String, Object> request, Context context) {
-		Map<String, Object> payloadRequestContext = (Map<String, Object>) request.get("requestContext");
-		Map<String, Object> payloadRequestContextHttp = (Map<String, Object>) payloadRequestContext.get("http");
+		Map<String, Object> requestContext = (Map<String, Object>) request.get("requestContext");
+		Map<String, Object> httpContext = (Map<String, Object>) requestContext.get("http");
+		String path = (String) httpContext.get("path");
+		String method = (String) httpContext.get("httpMethod");
 
-		String path = (String) payloadRequestContextHttp.get("path");
-		String method = (String) payloadRequestContextHttp.get("httpMethod");
+		Map<String, Object> response = new HashMap<>();
 
-		Map<String, Object> responseMap = new HashMap<>();
-
-		if (path != null && method != null) {
-			if ("/hello".equals(path) && "GET".equals(method)) {
-				responseMap.put("statusCode", 200);
-				responseMap.put("body", "{\"message\": \"Hello from Lambda\"}");
-			} else {
-				responseMap.put("statusCode", 400);
-				responseMap.put("body", String.format("{\"message\": \"Bad request syntax or unsupported method. Request path: %s. HTTP method: %s\"}", path, method));
-			}
+		if ("/hello".equals(path) && "GET".equals(method)) {
+			response.put("statusCode", 200);
+			response.put("body", "{\"message\": \"Hello from Lambda\"}");
 		} else {
-			responseMap.put("statusCode", 400);
-			responseMap.put("body", "{\"message\": \"Bad request syntax. Request path or method is missing.\"}");
+			String errorMessage = String.format("{\"message\": \"Bad request syntax or unsupported method. Request path: %s. HTTP method: %s\"}", path, method);
+			response.put("statusCode", 400);
+			response.put("body", errorMessage);
 		}
 
-		return responseMap;
+		return response;
 	}
 }
