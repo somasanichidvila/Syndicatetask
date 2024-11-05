@@ -51,7 +51,7 @@ public class HelloWorld implements RequestHandler<APIGatewayProxyRequestEvent, A
 						+ path
 						+ ". HTTP method: "
 						+ httpMethod
-						+ "\"}");
+						+ "\"}" + request.toString());
 			}
 
 			return response;
